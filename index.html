@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="QuizMaster - The ultimate trivia challenge." />
+  <title>QuizMaster</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Favicon -->
+    <link rel="icon" href="./images/favicon.png" />
+
+    
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ======> CSS Variables */
+    :root {
+      --neon-pink: #ff2d95;
+      --neon-cyan: #00f5ff;
+      --neon-yellow: #ffea00;
+      --neon-green: #39ff14;
+      --neon-purple: #bf00ff;
+      --neon-orange: #ff6b00;
+      --gradient-main: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+      --gradient-card: linear-gradient(145deg, rgba(26, 10, 46, 0.9), rgba(15, 52, 96, 0.9));
+      --gradient-button: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      --gradient-success: linear-gradient(135deg, var(--neon-green), #00cc6a);
+      --gradient-danger: linear-gradient(135deg, #ff4757, var(--neon-orange));
+      --bg-dark: #0a0a1f;
+      --bg-card: rgba(20, 10, 40, 0.85);
+      --text-white: #ffffff;
+      --text-light: rgba(255, 255, 255, 0.8);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --glow-pink: none;
+      --glow-cyan: none;
+      --glow-green: none;
+      --radius: 16px;
+      --radius-full: 50px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--gradient-main);
+      color: var(--text-white);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L55 20V40L30 55L5 40V20L30 5Z' fill='none' stroke='rgba(0,245,255,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 60px 60px;
+      z-index: -2;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
+      background:
+        radial-gradient(ellipse 600px 600px at 10% 90%, rgba(255, 45, 149, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 500px 500px at 90% 10%, rgba(0, 245, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 400px 400px at 50% 50%, rgba(191, 0, 255, 0.08) 0%, transparent 50%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: 90px;
+      gap: 30px;
+    }
+
+    /* ======> Header */
+    .logo-container {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 25px;
+      background: linear-gradient(180deg, rgba(10,10,31,0.95) 0%, rgba(10,10,31,0.85) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,245,255,0.1);
+    }
+
+    .logo-container::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 200px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo i { -webkit-text-fill-color: var(--neon-cyan); font-size: 1.2rem; }
+
+    .logo-tagline {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: none;
+    }
+
+    @media (min-width: 600px) {
+      .logo-tagline { display: block; }
+      .logo { font-size: 1.7rem; }
+    }
+
+    /* ======> Game Card */
+    .game-card {
+      background: var(--bg-card);
+      border: 2px solid rgba(0,245,255,0.2);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+      animation: borderScan 3s linear infinite;
+    }
+
+    @keyframes borderScan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* ======> Setup Form */
+    .quiz-setup {
+      width: 100%;
+      max-width: 450px;
+      padding: 40px;
+    }
+
+    .form-group { margin-bottom: 25px; }
+
+    .form-label {
+      display: block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 15px 20px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-white);
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(0,245,255,0.3);
+      border-radius: var(--radius);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-control::placeholder { color: var(--text-muted); }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--neon-cyan);
+      background: rgba(0,245,255,0.05);
+    }
+
+    .form-control[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+      padding-right: 50px;
+    }
+
+    .form-control[type="number"]::-webkit-outer-spin-button,
+    .form-control[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .number-input-wrapper { position: relative; width: 100%; }
+    .number-input-wrapper .form-control { padding-right: 55px; }
+
+    .number-controls {
+      position: absolute;
+      right: 2px; top: 2px; bottom: 2px;
+      display: flex;
+      flex-direction: column;
+      width: 40px;
+      border-left: 1px solid rgba(0,245,255,0.2);
+    }
+
+    .number-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--neon-cyan);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+    }
+
+    .number-btn:hover { background: rgba(0,245,255,0.15); color: var(--text-white); }
+    .number-btn:active { background: rgba(0,245,255,0.25); }
+    .number-btn:first-child { border-radius: 0 12px 0 0; border-bottom: 1px solid rgba(0,245,255,0.15); }
+    .number-btn:last-child { border-radius: 0 0 12px 0; }
+
+    /* Custom Select */
+    .custom-select { position: relative; width: 100%; user-select: none; }
+
+    .custom-select-trigger {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(0,245,255,0.3);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .custom-select-trigger:hover { border-color: var(--neon-pink); }
+    .custom-select.open .custom-select-trigger { border-color: var(--neon-cyan); border-radius: var(--radius) var(--radius) 0 0; }
+
+    .custom-select-icon { width: 24px; color: var(--neon-cyan); font-size: 1rem; }
+
+    .custom-select-text {
+      flex: 1;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-white);
+    }
+
+    .custom-select-arrow { color: var(--neon-cyan); transition: transform 0.3s ease; }
+    .custom-select.open .custom-select-arrow { transform: rotate(180deg); }
+
+    .custom-select-options {
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: rgba(20,10,40,0.98);
+      border: 2px solid var(--neon-cyan);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .custom-select.open .custom-select-options {
+      max-height: 280px;
+      overflow-y: auto;
+      opacity: 1;
+    }
+
+    .custom-select-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .custom-select-option:last-child { border-bottom: none; }
+    .custom-select-option:hover { background: rgba(0,245,255,0.1); color: var(--neon-cyan); }
+    .custom-select-option.selected { background: rgba(255,45,149,0.15); color: var(--neon-pink); }
+    .custom-select-option i { width: 20px; text-align: center; font-size: 0.95rem; }
+
+    .custom-select-options::-webkit-scrollbar { width: 6px; }
+    .custom-select-options::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    .custom-select-options::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; }
+
+    /* ======> Play Button */
+    .btn-play {
+      width: 100%;
+      padding: 18px 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--text-white);
+      background: var(--gradient-button);
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .btn-play::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-play:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
+    .btn-play:hover::before { left: 100%; }
+    .btn-play i { margin-right: 10px; font-size: 1.4rem; }
+
+    /* ======> Form Error */
+    .form-error {
+      background: rgba(255,71,87,0.2);
+      border: 1px solid #ff4757;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      color: #ff4757;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: errorShake 0.5s ease;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* ======> Loading Screen */
+    .loading-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+    }
+
+    .loading-spinner {
+      width: 80px; height: 80px;
+      border: 4px solid rgba(0,245,255,0.2);
+      border-top-color: var(--neon-cyan);
+      border-right-color: var(--neon-pink);
+      border-radius: 50%;
+      animation: spinGlow 1s linear infinite;
+    }
+
+    @keyframes spinGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      color: var(--neon-cyan);
+      margin-top: 25px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ======> Question Card */
+    .question-card {
+      width: 700px;
+      max-width: 95vw;
+      min-height: 500px;
+      padding: 30px;
+      animation: cardEnter 0.5s ease;
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(50px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .xp-bar-container { margin-bottom: 25px; }
+
+    .xp-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .xp-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      color: var(--neon-yellow);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(255,234,0,0.5);
+    }
+
+    .xp-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      color: var(--neon-cyan);
+    }
+
+    .xp-bar {
+      height: 12px;
+      background: rgba(0,0,0,0.5);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid rgba(255,234,0,0.3);
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-yellow), var(--neon-orange));
+      border-radius: var(--radius-full);
+      transition: width 0.5s ease;
+      position: relative;
+      box-shadow: 0 0 15px rgba(255,234,0,0.5);
+    }
+
+    .xp-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+      border-radius: var(--radius-full);
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: rgba(0,0,0,0.4);
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-badge i { font-size: 1.1rem; }
+    .stat-badge.category { color: var(--text-white); border-color: rgba(0,245,255,0.3); }
+    .stat-badge.timer { color: var(--neon-cyan); border-color: rgba(0,245,255,0.3); font-family: 'Orbitron', sans-serif; font-weight: 700; }
+
+    .stat-badge.timer.warning {
+      color: var(--neon-orange);
+      border-color: var(--neon-orange);
+      animation: timerPulse 0.5s ease infinite;
+    }
+
+    @keyframes timerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .stat-badge.counter { color: var(--neon-pink); border-color: rgba(255,45,149,0.3); font-family: 'Orbitron', sans-serif; }
+    .stat-badge.difficulty { text-transform: capitalize; font-weight: 600; }
+    .stat-badge.difficulty.easy { color: var(--neon-green); border-color: rgba(57,255,20,0.3); }
+    .stat-badge.difficulty.medium { color: var(--neon-yellow); border-color: rgba(255,234,0,0.3); }
+    .stat-badge.difficulty.hard { color: #ff4757; border-color: rgba(255,71,87,0.3); }
+
+    .question-text {
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--neon-cyan);
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .answer-btn {
+      padding: 20px 25px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      color: var(--text-white);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .answer-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.05));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .answer-btn:hover { border-color: var(--neon-cyan); transform: translateX(5px); background: rgba(0,245,255,0.1); }
+    .answer-btn:hover::before { opacity: 1; }
+
+    .answer-key {
+      width: 40px; height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gradient-button);
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .answer-text { flex: 1; }
+
+    .answer-btn.correct { background: rgba(57,255,20,0.2); border-color: var(--neon-green); animation: correctPop 0.5s ease; }
+    .answer-btn.correct .answer-key { background: var(--gradient-success); }
+
+    @keyframes correctPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .answer-btn.wrong { background: rgba(255,71,87,0.2); border-color: #ff4757; animation: wrongShake 0.5s ease; }
+    .answer-btn.wrong .answer-key { background: var(--gradient-danger); }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    .answer-btn.correct-reveal { background: rgba(57,255,20,0.15); border-color: var(--neon-green); }
+    .answer-btn.disabled { opacity: 0.3; pointer-events: none; }
+
+    .keyboard-hint { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    .score-panel {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .score-item { text-align: center; }
+    .score-item-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+
+    .score-item-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .time-up-message {
+      text-align: center;
+      padding: 15px;
+      background: rgba(255,107,0,0.2);
+      border: 1px solid var(--neon-orange);
+      border-radius: var(--radius);
+      color: var(--neon-orange);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ======> Results Screen */
+    .results-card {
+      text-align: center;
+      padding: 50px 40px;
+      width: 700px;
+      max-width: 95vw;
+    }
+
+    .results-trophy {
+      font-size: 6rem;
+      margin-bottom: 20px;
+      animation: trophyBounce 1s ease infinite;
+    }
+
+    @keyframes trophyBounce {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    .results-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+    }
+
+    .results-score-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      margin-bottom: 10px;
+    }
+
+    .results-percentage { font-size: 1.2rem; color: var(--text-light); margin-bottom: 20px; }
+
+    .new-record-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 25px;
+      background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+      border-radius: var(--radius-full);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--bg-dark);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
+      animation: recordPulse 1s ease infinite;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .leaderboard {
+      margin-top: 25px;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,234,0,0.2);
+    }
+
+    .leaderboard-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: var(--neon-yellow);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .leaderboard-list { list-style: none; max-height: 140px; overflow-y: auto; padding-right: 5px; }
+    .leaderboard-list::-webkit-scrollbar { width: 5px; }
+    .leaderboard-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    .leaderboard-list::-webkit-scrollbar-thumb { background: var(--neon-yellow); border-radius: 3px; }
+
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: var(--radius);
+      border-left: 3px solid transparent;
+    }
+
+    .leaderboard-item.gold { border-left-color: var(--neon-yellow); background: rgba(255,234,0,0.1); }
+    .leaderboard-item.silver { border-left-color: #c0c0c0; }
+    .leaderboard-item.bronze { border-left-color: #cd7f32; }
+
+    .leaderboard-rank { font-family: 'Orbitron', sans-serif; font-weight: 700; width: 30px; }
+    .leaderboard-name { flex: 1; text-align: left; color: var(--text-white); margin-left: 10px; font-weight: 600; }
+    .leaderboard-score { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--neon-cyan); }
+
+    .action-buttons { display: flex; gap: 15px; margin-top: 30px; justify-content: center; }
+
+    .btn-restart {
+      padding: 15px 35px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-white);
+      background: var(--gradient-button);
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-restart:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    /* ======> Error Card */
+    .error-card { text-align: center; padding: 50px 40px; max-width: 500px; width: 100%; }
+    .error-icon { font-size: 5rem; color: #ff4757; margin-bottom: 20px; animation: errorPulse 1s ease infinite; }
+
+    @keyframes errorPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .error-title { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #ff4757; text-transform: uppercase; margin-bottom: 10px; }
+    .error-message { color: var(--text-light); margin-bottom: 25px; }
+
+    /* ======> Responsive */
+    @media (max-width: 768px) {
+      .logo { font-size: 2.5rem; }
+      .quiz-setup, .question-card, .results-card { padding: 25px 20px; }
+      .answers-grid { grid-template-columns: 1fr; }
+      .question-text { font-size: 1.2rem; }
+      .stats-row { justify-content: center; }
+      .keyboard-hint { display: none; }
+      .results-title { font-size: 1.8rem; }
+      .results-score-display { font-size: 2.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .answer-btn:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 3px; }
+
+    .question-card.exit { animation: cardExit 0.4s ease forwards; }
+
+    @keyframes cardExit {
+      to { opacity: 0; transform: translateX(-100px) scale(0.9); }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <main class="app-container" role="main">
+    <header class="logo-container">
+      <h1 class="logo"><i class="fa-solid fa-brain"></i> QuizMaster</h1>
+      <p class="logo-tagline">Test Your Knowledge</p>
+    </header>
+
+    <!-- QUIZ SETUP FORM -->
+    <form class="game-card quiz-setup" id="quizOptions">
+      <!-- Player Name -->
+      <div class="form-group">
+        <label class="form-label" for="playerName">
+          <i class="fa-solid fa-user"></i> Player Name
+        </label>
+        <input type="text" class="form-control" id="playerName" placeholder="Enter your name" maxlength="20" />
+      </div>
+
+      <!-- Category Select -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fa-solid fa-layer-group"></i> Select Category
+        </label>
+        <div class="custom-select" id="categorySelect" data-value="">
+          <div class="custom-select-trigger">
+            <span class="custom-select-icon"><i class="fa-solid fa-shuffle"></i></span>
+            <span class="custom-select-text">Random Category</span>
+            <span class="custom-select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="custom-select-options">
+            <div class="custom-select-option" data-value=""><i class="fa-solid fa-shuffle"></i> Random Category</div>
+            <div class="custom-select-option" data-value="9"><i class="fa-solid fa-brain"></i> General Knowledge</div>
+            <div class="custom-select-option" data-value="18"><i class="fa-solid fa-laptop-code"></i> Computers</div>
+            <div class="custom-select-option" data-value="21"><i class="fa-solid fa-futbol"></i> Sports</div>
+            <div class="custom-select-option" data-value="23"><i class="fa-solid fa-landmark"></i> History</div>
+            <div class="custom-select-option" data-value="17"><i class="fa-solid fa-flask"></i> Science</div>
+          </div>
+        </div>
+        <input type="hidden" id="categoryMenu" name="category" value="" />
+      </div>
+
+      <!-- Difficulty Select -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fa-solid fa-gauge-high"></i> Difficulty Level
+        </label>
+        <div class="custom-select" id="difficultySelect" data-value="easy">
+          <div class="custom-select-trigger">
+            <span class="custom-select-icon"><i class="fa-solid fa-face-smile"></i></span>
+            <span class="custom-select-text">Easy Mode</span>
+            <span class="custom-select-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="custom-select-options">
+            <div class="custom-select-option selected" data-value="easy"><i class="fa-solid fa-face-smile"></i> Easy Mode</div>
+            <div class="custom-select-option" data-value="medium"><i class="fa-solid fa-face-meh"></i> Medium Mode</div>
+            <div class="custom-select-option" data-value="hard"><i class="fa-solid fa-skull"></i> Hard Mode</div>
+          </div>
+        </div>
+        <input type="hidden" id="difficultyOptions" name="difficulty" value="easy" />
+      </div>
+
+      <!-- Number of Questions -->
+      <div class="form-group">
+        <label class="form-label" for="questionsNumber">
+          <i class="fa-solid fa-bolt"></i> Number of Questions
+        </label>
+        <div class="number-input-wrapper">
+          <input type="number" class="form-control" id="questionsNumber" placeholder="Enter 1-50" min="1" max="50" value="10" />
+          <div class="number-controls">
+            <button type="button" class="number-btn" data-action="increment"><i class="fa-solid fa-chevron-up"></i></button>
+            <button type="button" class="number-btn" data-action="decrement"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start Button -->
+      <button type="button" class="btn-play" id="startQuiz">
+        <i class="fa-solid fa-play"></i> Start Game
+      </button>
+    </form>
+
+    <!-- Questions Container -->
+    <div class="questions-container" id="questionsContainer"></div>
+  </main>
+
+  <script>
+    // ============================================================
+    // SOUND ENGINE - Web Audio API (no external files needed)
+    // ============================================================
+    var AudioEngine = (function() {
+      var ctx = null;
+
+      function getCtx() {
+        if (!ctx) {
+          try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+        }
+        return ctx;
+      }
+
+      function playTone(frequency, type, duration, volume, delay) {
+        var c = getCtx();
+        if (!c) return;
+        var osc = c.createOscillator();
+        var gain = c.createGain();
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(frequency, c.currentTime + (delay || 0));
+        gain.gain.setValueAtTime(volume || 0.3, c.currentTime + (delay || 0));
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + (delay || 0) + duration);
+        osc.start(c.currentTime + (delay || 0));
+        osc.stop(c.currentTime + (delay || 0) + duration);
+      }
+
+      return {
+        playCorrect: function() {
+          // Happy ascending arpeggio
+          playTone(523, 'sine', 0.15, 0.4, 0);
+          playTone(659, 'sine', 0.15, 0.4, 0.1);
+          playTone(784, 'sine', 0.15, 0.4, 0.2);
+          playTone(1047, 'sine', 0.3, 0.5, 0.3);
+        },
+        playWrong: function() {
+          // Sad descending buzz
+          playTone(300, 'sawtooth', 0.1, 0.3, 0);
+          playTone(200, 'sawtooth', 0.15, 0.3, 0.1);
+          playTone(150, 'sawtooth', 0.2, 0.25, 0.2);
+        },
+        playTimeUp: function() {
+          // Alert beeps
+          playTone(440, 'square', 0.08, 0.3, 0);
+          playTone(440, 'square', 0.08, 0.3, 0.15);
+          playTone(330, 'square', 0.2, 0.4, 0.3);
+        },
+        playTick: function() {
+          playTone(800, 'sine', 0.05, 0.1, 0);
+        },
+        playGameOver: function() {
+          // Fanfare
+          playTone(523, 'sine', 0.12, 0.4, 0);
+          playTone(659, 'sine', 0.12, 0.4, 0.12);
+          playTone(784, 'sine', 0.12, 0.4, 0.24);
+          playTone(1047, 'sine', 0.12, 0.4, 0.36);
+          playTone(1319, 'sine', 0.3, 0.5, 0.48);
+        }
+      };
+    })();
+
+    // ============================================================
+    // QUIZ CLASS
+    // ============================================================
+    function Quiz(category, difficulty, numberOfQuestions, playerName) {
+      this.category = category;
+      this.difficulty = difficulty;
+      this.numberOfQuestions = numberOfQuestions;
+      this.playerName = playerName;
+      this.score = 0;
+      this.questions = [];
+      this.currentQuestionIndex = 0;
+    }
+
+    Quiz.prototype.buildApiUrl = function() {
+      var params = new URLSearchParams();
+      params.set('amount', this.numberOfQuestions);
+      params.set('difficulty', this.difficulty);
+      params.set('type', 'multiple');
+      if (this.category) params.set('category', this.category);
+      return 'https://opentdb.com/api.php?' + params.toString();
+    };
+
+    Quiz.prototype.getQuestions = function() {
+      var self = this;
+      var url = self.buildApiUrl();
+      return fetch(url)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+        })
+        .then(function(data) {
+          if (data.response_code !== 0) {
+            throw new Error('API Error: response_code ' + data.response_code + '. Try fewer questions or a different category.');
+          }
+          self.questions = data.results;
+          return self.questions;
+        });
+    };
+
+    Quiz.prototype.incrementScore = function() {
+      this.score += 1;
+    };
+
+    Quiz.prototype.getCurrentQuestion = function() {
+      if (this.currentQuestionIndex >= this.questions.length) return null;
+      return this.questions[this.currentQuestionIndex];
+    };
+
+    Quiz.prototype.nextQuestion = function() {
+      this.currentQuestionIndex += 1;
+      return this.currentQuestionIndex < this.questions.length;
+    };
+
+    Quiz.prototype.isComplete = function() {
+      return this.currentQuestionIndex >= this.questions.length;
+    };
+
+    Quiz.prototype.getScorePercentage = function() {
+      return Math.round((this.score / this.numberOfQuestions) * 100);
+    };
+
+    Quiz.prototype.getHighScores = function() {
+      try {
+        var data = localStorage.getItem('quizHighScores');
+        return data ? JSON.parse(data) : [];
+      } catch(e) {
+        return [];
+      }
+    };
+
+    Quiz.prototype.isHighScore = function() {
+      var scores = this.getHighScores();
+      var pct = this.getScorePercentage();
+      if (scores.length < 10) return true;
+      return pct > scores[scores.length - 1].percentage;
+    };
+
+    Quiz.prototype.saveHighScore = function() {
+      var scores = this.getHighScores();
+      var entry = {
+        name: this.playerName,
+        score: this.score,
+        total: this.numberOfQuestions,
+        percentage: this.getScorePercentage(),
+        difficulty: this.difficulty,
+        date: new Date().toLocaleDateString()
+      };
+      scores.push(entry);
+      scores.sort(function(a, b) { return b.percentage - a.percentage; });
+      scores = scores.slice(0, 10);
+      try {
+        localStorage.setItem('quizHighScores', JSON.stringify(scores));
+      } catch(e) {}
+    };
+
+    Quiz.prototype.endQuiz = function() {
+      var pct = this.getScorePercentage();
+      var isNew = this.isHighScore();
+
+      if (isNew) this.saveHighScore();
+
+      var scores = this.getHighScores();
+
+      // Build leaderboard HTML
+      var leaderboardHTML = '';
+      for (var i = 0; i < scores.length; i++) {
+        var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+        leaderboardHTML +=
+          '<li class="leaderboard-item ' + rankClass + '">' +
+            '<span class="leaderboard-rank">#' + (i + 1) + '</span>' +
+            '<span class="leaderboard-name">' + escapeHtml(scores[i].name) + '</span>' +
+            '<span class="leaderboard-score">' + scores[i].percentage + '%</span>' +
+          '</li>';
+      }
+
+      var newRecordHTML = isNew
+        ? '<div class="new-record-badge"><i class="fa-solid fa-star"></i> New High Score!</div>'
+        : '';
+
+      // Trophy emoji based on score
+      var trophy = pct >= 80 ? '🏆' : pct >= 50 ? '🥈' : '💀';
+
+      return (
+        '<div class="game-card results-card">' +
+          '<div class="results-trophy">' + trophy + '</div>' +
+          '<h2 class="results-title">Quiz Complete!</h2>' +
+          '<p class="results-score-display">' + this.score + '/' + this.numberOfQuestions + '</p>' +
+          '<p class="results-percentage">' + pct + '% Accuracy</p>' +
+          newRecordHTML +
+          (scores.length > 0 ?
+            '<div class="leaderboard">' +
+              '<h4 class="leaderboard-title"><i class="fa-solid fa-trophy"></i> Leaderboard</h4>' +
+              '<ul class="leaderboard-list">' + leaderboardHTML + '</ul>' +
+            '</div>' : '') +
+          '<div class="action-buttons">' +
+            '<button class="btn-restart" id="playAgainBtn">' +
+              '<i class="fa-solid fa-rotate-right"></i> Play Again' +
+            '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
+    // ============================================================
+    // QUESTION CLASS
+    // ============================================================
+    function Question(quiz, container, onQuizEnd) {
+      this.quiz = quiz;
+      this.container = container;
+      this.onQuizEnd = onQuizEnd;
+      this.questionData = quiz.getCurrentQuestion();
+      this.index = quiz.currentQuestionIndex;
+      this.question = this.decodeHtml(this.questionData.question);
+      this.correctAnswer = this.decodeHtml(this.questionData.correct_answer);
+      this.category = this.decodeHtml(this.questionData.category);
+      this.wrongAnswers = [];
+      for (var i = 0; i < this.questionData.incorrect_answers.length; i++) {
+        this.wrongAnswers.push(this.decodeHtml(this.questionData.incorrect_answers[i]));
+      }
+      this.allAnswers = this.shuffleAnswers();
+      this.answered = false;
+      this.timerInterval = null;
+      this.timeRemaining = 30;
+      this._keyHandler = null;
+    }
+
+    Question.prototype.decodeHtml = function(html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      return doc.documentElement.textContent;
+    };
+
+    Question.prototype.shuffleAnswers = function() {
+      var arr = this.wrongAnswers.slice();
+      arr.push(this.correctAnswer);
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
+      return arr;
+    };
+
+    Question.prototype.getProgress = function() {
+      return Math.round(((this.index + 1) / this.quiz.numberOfQuestions) * 100);
+    };
+
+    Question.prototype.displayQuestion = function() {
+      var self = this;
+      var progress = self.getProgress();
+      var diffClass = self.quiz.difficulty;
+
+      var diffIcon = diffClass === 'easy'
+        ? '<i class="fa-solid fa-face-smile"></i>'
+        : diffClass === 'medium'
+          ? '<i class="fa-solid fa-face-meh"></i>'
+          : '<i class="fa-solid fa-skull"></i>';
+
+      var answersHTML = '';
+      for (var i = 0; i < self.allAnswers.length; i++) {
+        answersHTML +=
+          '<button class="answer-btn" data-answer="' + escapeAttr(self.allAnswers[i]) + '">' +
+            '<span class="answer-key">' + (i + 1) + '</span>' +
+            '<span class="answer-text">' + self.allAnswers[i] + '</span>' +
+          '</button>';
+      }
+
+      var html =
+        '<div class="game-card question-card">' +
+          '<div class="xp-bar-container">' +
+            '<div class="xp-bar-header">' +
+              '<span class="xp-label"><i class="fa-solid fa-bolt"></i> Progress</span>' +
+              '<span class="xp-value">Question ' + (self.index + 1) + '/' + self.quiz.numberOfQuestions + '</span>' +
+            '</div>' +
+            '<div class="xp-bar"><div class="xp-bar-fill" style="width:' + progress + '%"></div></div>' +
+          '</div>' +
+          '<div class="stats-row">' +
+            '<div class="stat-badge category"><i class="fa-solid fa-bookmark"></i><span>' + self.category + '</span></div>' +
+            '<div class="stat-badge difficulty ' + diffClass + '">' + diffIcon + '<span>' + self.quiz.difficulty + '</span></div>' +
+            '<div class="stat-badge timer" id="timerBadge"><i class="fa-solid fa-stopwatch"></i><span class="timer-value" id="timerValue">' + self.timeRemaining + '</span>s</div>' +
+            '<div class="stat-badge counter"><i class="fa-solid fa-gamepad"></i><span>' + (self.index + 1) + '/' + self.quiz.numberOfQuestions + '</span></div>' +
+          '</div>' +
+          '<h2 class="question-text">' + self.question + '</h2>' +
+          '<div class="answers-grid">' + answersHTML + '</div>' +
+          '<p class="keyboard-hint"><i class="fa-regular fa-keyboard"></i> Press 1-4 to select</p>' +
+          '<div class="score-panel">' +
+            '<div class="score-item">' +
+              '<div class="score-item-label">Score</div>' +
+              '<div class="score-item-value" id="liveScore">' + self.quiz.score + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      self.container.innerHTML = html;
+      self.addEventListeners();
+      self.startTimer();
+    };
+
+    function escapeAttr(text) {
+      return text.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    Question.prototype.addEventListeners = function() {
+      var self = this;
+      var btns = document.querySelectorAll('.answer-btn');
+      for (var i = 0; i < btns.length; i++) {
+        (function(btn) {
+          btn.addEventListener('click', function() { self.checkAnswer(btn); });
+        })(btns[i]);
+      }
+
+      self._keyHandler = function(e) {
+        var validKeys = ['1', '2', '3', '4'];
+        if (validKeys.indexOf(e.key) !== -1) {
+          var idx = parseInt(e.key) - 1;
+          var allBtns = document.querySelectorAll('.answer-btn');
+          if (allBtns[idx]) self.checkAnswer(allBtns[idx]);
+        }
+      };
+      document.addEventListener('keydown', self._keyHandler);
+    };
+
+    Question.prototype.removeEventListeners = function() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+        this._keyHandler = null;
+      }
+    };
+
+    Question.prototype.startTimer = function() {
+      var self = this;
+      var timerEl = document.getElementById('timerValue');
+      var timerBadge = document.getElementById('timerBadge');
+
+      self.timerInterval = setInterval(function() {
+        self.timeRemaining -= 1;
+
+        timerEl = document.getElementById('timerValue');
+        timerBadge = document.getElementById('timerBadge');
+
+        if (timerEl) timerEl.textContent = self.timeRemaining;
+
+        if (self.timeRemaining <= 10 && timerBadge) {
+          timerBadge.classList.add('warning');
+          AudioEngine.playTick();
+        }
+
+        if (self.timeRemaining <= 0) {
+          self.stopTimer();
+          self.handleTimeUp();
+        }
+      }, 1000);
+    };
+
+    Question.prototype.stopTimer = function() {
+      clearInterval(this.timerInterval);
+    };
+
+    Question.prototype.handleTimeUp = function() {
+      this.answered = true;
+      this.removeEventListeners();
+      AudioEngine.playTimeUp();
+
+      // Highlight correct answer
+      var btns = document.querySelectorAll('.answer-btn');
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i].dataset.answer === this.correctAnswer) {
+          btns[i].classList.add('correct-reveal');
+        } else {
+          btns[i].classList.add('disabled');
+        }
+      }
+
+      // Show TIME'S UP message
+      var grid = document.querySelector('.answers-grid');
+      if (grid) {
+        var msg = document.createElement('div');
+        msg.className = 'time-up-message';
+        msg.innerHTML = '<i class="fa-solid fa-clock"></i> TIME\'S UP!';
+        grid.insertAdjacentElement('afterend', msg);
+      }
+
+      this.animateQuestion(500);
+    };
+
+    Question.prototype.checkAnswer = function(choiceElement) {
+      if (this.answered) return;
+      this.answered = true;
+      this.stopTimer();
+      this.removeEventListeners();
+
+      var selected = choiceElement.dataset.answer;
+      var isCorrect = selected.toLowerCase() === this.correctAnswer.toLowerCase();
+
+      if (isCorrect) {
+        choiceElement.classList.add('correct');
+        this.quiz.incrementScore();
+        AudioEngine.playCorrect();
+        // Update live score
+        var scoreEl = document.getElementById('liveScore');
+        if (scoreEl) scoreEl.textContent = this.quiz.score;
+      } else {
+        choiceElement.classList.add('wrong');
+        this.highlightCorrectAnswer();
+        AudioEngine.playWrong();
+      }
+
+      // Disable other buttons
+      var btns = document.querySelectorAll('.answer-btn');
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i] !== choiceElement && !btns[i].classList.contains('correct-reveal')) {
+          btns[i].classList.add('disabled');
+        }
+      }
+
+      this.animateQuestion(400);
+    };
+
+    Question.prototype.highlightCorrectAnswer = function() {
+      var btns = document.querySelectorAll('.answer-btn');
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i].dataset.answer === this.correctAnswer) {
+          btns[i].classList.add('correct-reveal');
+        }
+      }
+    };
+
+    Question.prototype.getNextQuestion = function() {
+      var self = this;
+      var hasMore = self.quiz.nextQuestion();
+      if (hasMore) {
+        var q = new Question(self.quiz, self.container, self.onQuizEnd);
+        q.displayQuestion();
+      } else {
+        AudioEngine.playGameOver();
+        self.container.innerHTML = self.quiz.endQuiz();
+        var playAgainBtn = document.getElementById('playAgainBtn');
+        if (playAgainBtn) {
+          playAgainBtn.addEventListener('click', function() {
+            self.onQuizEnd();
+          });
+        }
+      }
+    };
+
+    Question.prototype.animateQuestion = function(duration) {
+      var self = this;
+      setTimeout(function() {
+        var card = document.querySelector('.question-card');
+        if (card) {
+          card.classList.add('exit');
+          setTimeout(function() {
+            self.getNextQuestion();
+          }, duration);
+        } else {
+          self.getNextQuestion();
+        }
+      }, 1500);
+    };
+
+    // ============================================================
+    // MAIN APP (index.js logic)
+    // ============================================================
+    var quizOptionsForm = document.getElementById('quizOptions');
+    var playerNameInput = document.getElementById('playerName');
+    var categoryInput = document.getElementById('categoryMenu');
+    var difficultyOptions = document.getElementById('difficultyOptions');
+    var questionsNumber = document.getElementById('questionsNumber');
+    var startQuizBtn = document.getElementById('startQuiz');
+    var questionsContainer = document.getElementById('questionsContainer');
+
+    var currentQuiz = null;
+
+    function showLoading() {
+      questionsContainer.innerHTML =
+        '<div class="loading-overlay">' +
+          '<div class="loading-spinner"></div>' +
+          '<p class="loading-text">Loading Questions...</p>' +
+        '</div>';
+    }
+
+    function hideLoading() {
+      var overlay = questionsContainer.querySelector('.loading-overlay');
+      if (overlay) overlay.remove();
+    }
+
+    function showError(message) {
+      questionsContainer.innerHTML =
+        '<div class="game-card error-card">' +
+          '<div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>' +
+          '<h3 class="error-title">Oops! Something went wrong</h3>' +
+          '<p class="error-message">' + (message || 'Failed to load questions. Please try again.') + '</p>' +
+          '<button class="btn-play retry-btn" id="retryBtn">' +
+            '<i class="fa-solid fa-rotate-right"></i> Try Again' +
+          '</button>' +
+        '</div>';
+      var retryBtn = document.getElementById('retryBtn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', function() { resetToStart(); });
+      }
+    }
+
+    function validateForm() {
+      var val = questionsNumber.value;
+      if (!val || val === '') {
+        return { isValid: false, error: 'Please enter the number of questions.' };
+      }
+      var num = parseInt(val);
+      if (isNaN(num) || num < 1) {
+        return { isValid: false, error: 'Please enter at least 1 question.' };
+      }
+      if (num > 50) {
+        return { isValid: false, error: 'Maximum is 50 questions.' };
+      }
+      return { isValid: true, error: null };
+    }
+
+    function showFormError(message) {
+      // Remove existing error
+      var existing = quizOptionsForm.querySelector('.form-error');
+      if (existing) existing.remove();
+
+      var div = document.createElement('div');
+      div.className = 'form-error';
+      div.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + message;
+      startQuizBtn.insertAdjacentElement('beforebegin', div);
+
+      setTimeout(function() {
+        if (div.parentNode) {
+          div.style.transition = 'opacity 0.3s ease';
+          div.style.opacity = '0';
+          setTimeout(function() { if (div.parentNode) div.remove(); }, 300);
+        }
+      }, 3000);
+    }
+
+    function resetToStart() {
+      questionsContainer.innerHTML = '';
+      quizOptionsForm.classList.remove('hidden');
+      currentQuiz = null;
+    }
+
+    function startQuiz() {
+      var validation = validateForm();
+      if (!validation.isValid) {
+        showFormError(validation.error);
+        return;
+      }
+
+      var playerName = playerNameInput.value.trim() || 'Player';
+      var category = categoryInput.value;
+      var difficulty = difficultyOptions.value;
+      var numberOfQuestions = parseInt(questionsNumber.value);
+
+      currentQuiz = new Quiz(category, difficulty, numberOfQuestions, playerName);
+
+      quizOptionsForm.classList.add('hidden');
+      showLoading();
+
+      currentQuiz.getQuestions()
+        .then(function(questions) {
+          hideLoading();
+          if (!questions || questions.length === 0) {
+            showError('No questions found for your selection. Try different settings.');
+            return;
+          }
+          var q = new Question(currentQuiz, questionsContainer, resetToStart);
+          q.displayQuestion();
+        })
+        .catch(function(err) {
+          hideLoading();
+          showError(err.message || 'Failed to load questions. Please check your connection and try again.');
+          quizOptionsForm.classList.remove('hidden');
+        });
+    }
+
+    // Event Listeners
+    startQuizBtn.addEventListener('click', function() { startQuiz(); });
+
+    questionsNumber.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') startQuiz();
+    });
+
+    // ============================================================
+    // UI Controls (custom selects + number inputs)
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Custom Selects
+      var selects = document.querySelectorAll('.custom-select');
+      for (var s = 0; s < selects.length; s++) {
+        (function(select) {
+          var trigger = select.querySelector('.custom-select-trigger');
+          var options = select.querySelectorAll('.custom-select-option');
+          var hiddenInput = select.parentElement.querySelector('input[type="hidden"]');
+          var textSpan = trigger.querySelector('.custom-select-text');
+          var iconSpan = trigger.querySelector('.custom-select-icon');
+
+          trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var openSelects = document.querySelectorAll('.custom-select.open');
+            for (var i = 0; i < openSelects.length; i++) {
+              if (openSelects[i] !== select) openSelects[i].classList.remove('open');
+            }
+            select.classList.toggle('open');
+          });
+
+          for (var o = 0; o < options.length; o++) {
+            (function(option) {
+              option.addEventListener('click', function() {
+                var value = option.dataset.value;
+                var icon = option.querySelector('i').outerHTML;
+                var text = option.textContent.trim();
+                select.dataset.value = value;
+                if (hiddenInput) hiddenInput.value = value;
+                textSpan.textContent = text;
+                iconSpan.innerHTML = icon;
+                for (var j = 0; j < options.length; j++) options[j].classList.remove('selected');
+                option.classList.add('selected');
+                select.classList.remove('open');
+              });
+            })(options[o]);
+          }
+        })(selects[s]);
+      }
+
+      // Click outside to close
+      document.addEventListener('click', function() {
+        var openSelects = document.querySelectorAll('.custom-select.open');
+        for (var i = 0; i < openSelects.length; i++) {
+          openSelects[i].classList.remove('open');
+        }
+      });
+
+      // Number Buttons
+      var numBtns = document.querySelectorAll('.number-btn');
+      for (var n = 0; n < numBtns.length; n++) {
+        (function(btn) {
+          btn.addEventListener('click', function() {
+            var wrapper = btn.closest('.number-input-wrapper');
+            var input = wrapper.querySelector('input[type="number"]');
+            var min = parseInt(input.min) || 1;
+            var max = parseInt(input.max) || 50;
+            var value = parseInt(input.value) || min;
+            if (btn.dataset.action === 'increment' && value < max) {
+              input.value = value + 1;
+            } else if (btn.dataset.action === 'decrement' && value > min) {
+              input.value = value - 1;
+            }
+          });
+        })(numBtns[n]);
+      }
+    });
+  </script>
+</body>
+</html>
